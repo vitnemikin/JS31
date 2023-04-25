@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="JS31.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="coffeemachine">
+        <div class="main-part">
+            <div class="display"></div>
+            <div class="dispensing">
+                <div class="cup">
+                    <img src="cup.png">
+                </div>
+            </div>
+        </div>
+
+        	<!-- Терминал оплаты и монетоприёмник -->
+	    <div class="payment-zone">
+
+		    <div class="visa">
+			    <h3>Оплатите через карту или QR-код:</h3>
+			    <div class="payment-info">
+				    <span class="payment-amount">0 тенге</span>
+				    <img src="QR.gif" alt="QR-код" class="qr-code">
+				    <p>Приложите карту или отсканируйте QR-код</p>
+			    </div>
+		    </div>
+
+		    <div class="coins">
+			    <h3>Внесите монеты:</h3>
+			    <img src="coin200.png" value="200" class="coin">
+			    <img src="coin100.png" value="100" class="coin">
+			    <img src="coin50.png" value="50" class="coin">
+			    <span class="total">0 тенге</span>
+		    </div>
+
+			    <button class="pay-button btn">Оплатить</button>
+
+	
+
+	        <!-- Лоток для сдачи и кнопка возврата сдачи -->
+	        <div class="change-zone">
+		        <button class="return-button btn">Вернуть сдачу</button>
+		        <span class="coin-tray">0 тенге</span>
+				<div class="coins_change">
+				<img src="coin200.png" value="200" class="coin">
+			    <img src="coin100.png" value="100" class="coin">
+			    <img src="coin50.png" value="50" class="coin">
+				</div>
+	        </div>
+        </div>
+
+    </div>
+
+    <script src="JS31.js"></script>
+</body>
+</html>
