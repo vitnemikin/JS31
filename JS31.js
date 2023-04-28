@@ -86,7 +86,11 @@ class StateCoffeeMachine {
                 totalQR.classList.add('blink-yellow-red');
                 alert.textContent = `Ваш ${this.name} стоит ${this.price} тенге, оплатите. Внесенная сумма: ${this.sum} тенге`;
     
-                qrPayButton.addEventListener('click', () => {
+                qrPayButton.addEventListener('click', () => {   // VN: выглядит как необходимость в
+                                                                // ещё одном сигнале и ещё одном состоянии.
+                                                                // Не нашёл в коде removeEventListener,
+                                                                // что означает, что со временем эти обработчики
+                                                                // будут накладываться друг на друга.
                     if (this.#currentState === this.PAYING) {
                         this.sum += this.price;
                         
@@ -100,7 +104,7 @@ class StateCoffeeMachine {
                 });
                     
                 coins.forEach(coin => {
-                    coin.addEventListener('click', () => {
+                    coin.addEventListener('click', () => {      // VN: то же самое ^
                       if (this.#currentState === this.PAYING) {
                         const valueOfCoin = parseInt(coin.getAttribute('value'));
                         this.sum += valueOfCoin;
@@ -131,9 +135,13 @@ class StateCoffeeMachine {
                     coinTray.textContent = `${this.sum} тенге`;
                     coinTray.classList.add('blink-green');
 
-                    changeBtn.addEventListener('click', () => {
+                    changeBtn.addEventListener('click', () => {    // VN: то же самое ^
                         coinTray.textContent = `${0} тенге`;
-                        this.process(this.SIG_BUTTON);
+                        this.process(this.SIG_BUTTON);          // VN: кнопки разные, а сигнал один.
+                                                                // Смысл State Machine в том, что есть
+                                                                // множество разных сигналов, а реакция
+                                                                // есть только на те, которые имеют смысл
+                                                                // для текущего состояния
                         coinTray.classList.remove('blink-green');
                     })
 
@@ -153,25 +161,26 @@ class StateCoffeeMachine {
                 osnova.style.display = 'flex';
                 
                 if (this.#currentState === this.PREPARING) {
-                    intID = setInterval(() => {
+                    intID = setInterval(() => {     // VN: его тоже надо в #currentTimers, чтобы наверняка
+                                                    // удалялся при смене состояний
                         progress++;
                         alert.innerHTML = `Ожидайте приготовления ${this.name}!  <br /> ${progress} %`; 
                     }, 150);
 
                 }
                 
-                totalCoin.classList.remove('blink-yellow-red');
-                totalCoin.classList.remove('blink-green');
-                totalQR.classList.remove('blink-yellow-red');
-                totalQR.classList.remove('blink-green');
+                totalCoin.classList.remove('blink-yellow-red');  // VN: такие штуки, конечно, лучше
+                totalCoin.classList.remove('blink-green');       // вынести в отдельные функции, чтобы 
+                totalQR.classList.remove('blink-yellow-red');    // sm была лаконичнее и занималась бы
+                totalQR.classList.remove('blink-green');         // только логикой
 
                 cup.style.display = 'block';
                 cup.classList.add('cup_inter');
 
                 this.#currentTimers.push(setTimeout( () =>{
-                    clearInterval(intID);
-                    this.process(this.SIG_TIMER)
-                } , 15000) );
+                    clearInterval(intID);           // VN: Был бы intID в #currentTimers, то дёргать
+                    this.process(this.SIG_TIMER)    // SIG_TIMER можно было бы в нём, по if, а этот
+                } , 15000) );                       // таймер был бы не нужен
             break;
             case this.FINISHED:
                 this.AllLightsOff();
@@ -182,8 +191,8 @@ class StateCoffeeMachine {
                 cup.classList.remove('cup_inter');
                 cup.classList.add('coffee_ready');
     
-                cup.addEventListener('click', () => {
-                    this.process(this.SIG_BUTTON);
+                cup.addEventListener('click', () => {   // VN: см. выше про обработчики
+                    this.process(this.SIG_BUTTON);      // и про разные сигналы
                     cup.style.display = 'none';
                     cup.classList.remove('coffee_ready');
                 });
@@ -199,7 +208,7 @@ class StateCoffeeMachine {
                     coinTray.classList.add('blink-green');
                     coins_change.style.display = 'block';
 
-                    changeBtn.addEventListener('click', () => {
+                    changeBtn.addEventListener('click', () => {  // VN: то же ^
                         coinTray.textContent = `${0} тенге`;
                         coinTray.classList.remove('blink-green');
                         coins_change.style.display = 'none';
@@ -208,7 +217,7 @@ class StateCoffeeMachine {
                     })
 
                 } else {
-                    alert.textContent = `Хорошего дня!`;
+                    alert.textContent = `Хорошего дня!`;    // Мя ^_^
                     this.#currentTimers.push(setTimeout(() => this.process(this.SIG_TIMER), 3000));
                 }
 
@@ -225,7 +234,7 @@ class StateCoffeeMachine {
 
 
 
-class CoffeeItem {
+class CoffeeItem {           // VN: Супер!
     constructor(name, price) {
         this.name = name;
         this.price = price;
@@ -270,7 +279,7 @@ class CoffeeItem {
         this.buyButton.classList.add('anime');
         this.buyButton.textContent = 'Выбрать';
         this.infoElement.append(this.buyButton);
-
+                                                    // VN: почему бы сразу обработчики не навесить?
     }
     
     setImage(url) {
@@ -313,8 +322,13 @@ pickButtons.forEach(button => {
 
         // Получаем родительский-родительский див кнопки
         // closest('.item') метод ищет близжайщего предка соответсвующего css-селектору
-        const parent = button.closest('.item');
-        let coffeeMachine = new StateCoffeeMachine(parent);
+        const parent = button.closest('.item'); // VN: thumbsUp!
+        let coffeeMachine = new StateCoffeeMachine(parent);  // VN: вот это очень опасно!
+                                                        // так можно создать несколько одинаковых
+                                                        // конкурирующих машин состояний.
+                                                        // Нужно чётко и надёжно обеспечить существование
+                                                        // только одной SM.
+                                                             
         coffeeMachine.process(coffeeMachine.SIG_BUTTON);
 
         // Добавляем класс "animate" только для родительского дива текущей кнопки
